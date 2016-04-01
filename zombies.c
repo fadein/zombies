@@ -14,7 +14,11 @@ int main(void) {
 		switch (c) {
 			case 'w':
 			case 'q':
-				while ( waitpid(-1, NULL, WNOHANG) > 0) {}
+				{
+					pid_t child;
+					while ( (child = waitpid(-1, NULL, WNOHANG)) > 0)
+						printf("Reaped child %d\n", child);
+				}
 				break;
 			default:
 				{
