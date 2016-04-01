@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <termios.h>
 
 void usage(void) {
 		printf("\nINSTRUCTIONS:\n"
@@ -14,10 +15,17 @@ void usage(void) {
 
 int main(void) {
 	char c;
+
+	struct termios oldt, newt;
+	tcgetattr(STDIN_FILENO, &oldt);
+	newt = oldt;
+	newt.c_lflag &= ~(ICANON);
+	tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+
 	usage();
 
 	while (1) {
-		read(fileno(stdin), &c, sizeof(char));
+			c = getchar();
 		switch (c) {
 			case 'w':
 			case 'q':
@@ -34,7 +42,7 @@ int main(void) {
 			default:
 				{
 					pid_t child = fork();
-					if (!child)
+					if (child == 0)
 						c = 'q';
 					else
 						printf("Forked a child %d\n", child);
@@ -44,5 +52,6 @@ int main(void) {
 			break;
 	}
 
+	tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
 	return 0;
 }
