@@ -3,11 +3,18 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
+void usage(void) {
+		printf("\nINSTRUCTIONS:\n"
+						"=============\n"
+						"press 'w' to call wait()\n"
+						"press 'q' to quit\n"
+						"press '?' to read these instructions again\n"
+						"press the any key to spawn a new zombie\n\n");
+}
+
 int main(void) {
 	char c;
-	printf("press 'w' to call wait()\n"
-			"press 'q' to quit\n"
-			"press the any key to spawn a new zombie\n\n");
+	usage();
 
 	while (1) {
 		read(fileno(stdin), &c, sizeof(char));
@@ -19,6 +26,9 @@ int main(void) {
 					while ( (child = waitpid(-1, NULL, WNOHANG)) > 0)
 						printf("Reaped child %d\n", child);
 				}
+				break;
+			case '?':
+				usage();
 				break;
 			default:
 				{
