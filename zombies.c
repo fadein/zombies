@@ -23,8 +23,9 @@ int main(void) {
 			case 'q':
 				{
 					pid_t child;
+					int count = 0;
 					while ( (child = waitpid(-1, NULL, WNOHANG)) > 0)
-						printf("Reaped child %d\n", child);
+						printf("Reaped child #%d %d\n", ++count, child);
 				}
 				break;
 			case '?':
