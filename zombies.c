@@ -15,11 +15,12 @@ void usage(void) {
 
 int main(void) {
 	char c;
+	pid_t child = -1;
 
 	struct termios oldt, newt;
 	tcgetattr(STDIN_FILENO, &oldt);
 	newt = oldt;
-	newt.c_lflag &= ~(ICANON);
+	newt.c_lflag &= ~(ICANON | ECHO);
 	tcsetattr(STDIN_FILENO, TCSANOW, &newt);
 
 	usage();
@@ -30,7 +31,6 @@ int main(void) {
 			case 'w':
 			case 'q':
 				{
-					pid_t child;
 					int count = 0;
 					while ( (child = waitpid(-1, NULL, WNOHANG)) > 0)
 						printf("Reaped child #%d %d\n", ++count, child);
@@ -40,18 +40,18 @@ int main(void) {
 				usage();
 				break;
 			default:
-				{
-					pid_t child = fork();
-					if (child == 0)
+				child = fork();
+				if (child == 0)
 						c = 'q';
-					else
+				else
 						printf("Forked a child %d\n", child);
-				}
 		}
 		if (c == 'q')
-			break;
+				break;
 	}
 
-	tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+	if (child != 0)
+			tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+
 	return 0;
 }
